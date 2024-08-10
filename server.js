@@ -1,35 +1,47 @@
 const express = require('express');
-const Stripe = require('stripe');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-
+const key = "sk_test_51PmGyqRrMFlb2honuy5apbI34L52dalnS1gfXT3FLSKtNJOPedAuWAL1EaTUxy4Y6dmBTUHiRvmJ2W94Nxj52BW0006nNMVha7"
+const stripe = require('stripe')(key);
 const app = express();
-const stripe = Stripe('sk_test_51PmJK1AaKRJTC7agjo54SaWTvm5aUvdjq2PkpocZGaoew3tz9RPibYuwyOZmDwy10AoVhfdD6hK64OJ8BabI1OX200cD6Y0oRg'); // Replace with your Stripe Secret Key
+const cors = require("cors")
+app.use(express.json());
 
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors())
 
+app.get('/', (req, res) => {
+    res.status(200).json({message: "running"});
+});
 app.post('/create-checkout-session', async (req, res) => {
-    const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-            {
-                price_data: {
-                    currency: 'usd',
-                    product_data: {
-                        name: 'Villa Booking',
-                    },
-                    unit_amount: 7500 * 100, // Replace with the dynamic amount
-                },
-                quantity: 1,
-            },
-        ],
-        mode: 'payment',
-        success_url: 'https://villaonclick.webflow.io/profile', // Replace with your success URL
-        cancel_url: 'https://villaonclick.webflow.io',   // Replace with your cancel URL
-    });
+    const { name, email, phone, amount } = req.body;
 
-    res.json({ id: session.id });
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: 'villaonclick',
+                        },
+                        unit_amount: amount, // Amount in cents
+                    },
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            mode: 'payment',
+            success_url: 'https://villaonclick.webflow.io/profile?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url: 'https://villaonclick.webflow.io/payment-fail',
+            metadata: {
+                name,
+                phone,
+            },
+        });
+
+        res.json({ id: session.id });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-app.listen(4242, () => console.log('Server is running on port 4242'));
+app.listen(3000, () => console.log('Server running on port 3000'));

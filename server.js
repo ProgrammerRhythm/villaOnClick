@@ -31,7 +31,7 @@ app.post('/create-checkout-session', async (req, res) => {
             customer_email: email,
             mode: 'payment',
             success_url: 'https://villaonclick.webflow.io/profile?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url: 'https://villaonclick.webflow.io/profile?session_id=',
+            cancel_url: 'https://villaonclick.webflow.io/profile?session_id=no',
             metadata: {
                 name,
                 phone,

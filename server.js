@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-order', async (req, res) => {
-    const { amount } = req.body; // The amount is expected in ILS cents
+    const { amount } = req.body; // The amount is expected in USD cents
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer('return=representation');
@@ -23,8 +23,8 @@ app.post('/create-order', async (req, res) => {
         intent: 'CAPTURE',
         purchase_units: [{
             amount: {
-                currency_code: 'ILS', // Change to ILS
-                value: (amount / 100).toFixed(2), // Convert amount to shekels
+                currency_code: 'USD',
+                value: (amount / 100).toFixed(2), // Convert amount to dollars
             },
         }],
     });
